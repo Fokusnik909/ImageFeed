@@ -8,7 +8,7 @@
 import Foundation
 import UIKit
 
-class ProfileViewController: UIViewController {
+final class ProfileViewController: UIViewController {
     
     @IBOutlet weak var avatarPhoto: UIImageView!
     @IBOutlet weak var logOut: UIButton!
