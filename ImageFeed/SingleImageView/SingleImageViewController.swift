@@ -9,13 +9,13 @@ import Foundation
 import UIKit
 
 final class SingleImageViewController: UIViewController {
-    @IBOutlet weak var scrollView: UIScrollView!
+    @IBOutlet private var scrollView: UIScrollView!
     
-    var image: UIImage? {
+     var image: UIImage? {
         didSet {
-            guard isViewLoaded else {return}
+            guard isViewLoaded, let image else {return}
             imageView.image = image
-            guard let image = image else {return}
+            imageView.frame.size = image.size
             rescaleAndCenterImageInScrollView(image: image)
         }
     }
@@ -26,10 +26,12 @@ final class SingleImageViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        imageView.image = image
         scrollView.minimumZoomScale = 0.1
         scrollView.maximumZoomScale = 1.25
+        
         guard let image = image else {return}
+        imageView.image = image
+        imageView.frame.size = image.size
         rescaleAndCenterImageInScrollView(image: image)
     }
     
@@ -60,14 +62,49 @@ final class SingleImageViewController: UIViewController {
         scrollView.setContentOffset(CGPoint(x: x, y: y), animated: false)
     }
     
+    private func updateMinZoomScaleForSize(_ size: CGSize) {
+        let widthScale = size.width / imageView.bounds.width
+        let heightScale = size.height / imageView.bounds.height
+        let minScale = min(widthScale, heightScale)
+        
+        scrollView.minimumZoomScale = minScale
+        scrollView.zoomScale = minScale
+        scrollView.zoomScale = scrollView.minimumZoomScale
+    }
+    
+    private func centerImage() {
+        let boundsSize = scrollView.bounds.size
+        var frameToCenter = imageView.frame
+    
+        if frameToCenter.size.width < boundsSize.width {
+            frameToCenter.origin.x = (boundsSize.width - frameToCenter.size.width) / 2
+        } else {
+            frameToCenter.origin.x = 0
+        }
+        
+        if frameToCenter.size.height < boundsSize.height {
+            frameToCenter.origin.y = (boundsSize.height - frameToCenter.size.height) / 2
+        } else {
+            frameToCenter.origin.y = 0
+        }
+        
+        imageView.frame = frameToCenter
+    }
+    
 }
 
 extension SingleImageViewController: UIScrollViewDelegate {
     func viewForZooming(in scrollView: UIScrollView) -> UIView? {
-        
-        //        imageView.image = image
-        //        imageView.frame.size = image.size
-        return imageView
+        imageView
+    }
+    
+    func scrollViewDidEndZooming(_ scrollView: UIScrollView, with view: UIView?, atScale scale: CGFloat) {
+        centerImage()
+    }
+    
+    override func viewWillLayoutSubviews() {
+        super.viewWillLayoutSubviews()
+        updateMinZoomScaleForSize(view.bounds.size)
     }
     
 }
