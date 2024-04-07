@@ -23,7 +23,7 @@ final class ProfileViewController: UIViewController {
         let button = UIButton.systemButton(with: UIImage(named: "Exit")! ,
                                            target: nil,
                                            action: #selector(Self.didTapLogoutButton))
-        button.tintColor = .red
+        button.tintColor = .ypRed
         button.translatesAutoresizingMaskIntoConstraints = false
         return button
     }()
@@ -76,13 +76,13 @@ final class ProfileViewController: UIViewController {
         for view in subView { self.view.addSubview(view)}
         
         NSLayoutConstraint.activate([
-            avatarPhoto.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 20),
+            avatarPhoto.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 16),
             avatarPhoto.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 20),
             avatarPhoto.heightAnchor.constraint(equalToConstant: 70),
             avatarPhoto.widthAnchor.constraint(equalToConstant: 70),
             
             logout.centerYAnchor.constraint(equalTo: avatarPhoto.centerYAnchor),
-            logout.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -20),
+            logout.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -24),
             
             nameLabel.topAnchor.constraint(equalTo: avatarPhoto.bottomAnchor, constant: 8),
             nameLabel.leadingAnchor.constraint(equalTo: avatarPhoto.leadingAnchor),
