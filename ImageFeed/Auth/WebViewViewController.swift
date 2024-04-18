@@ -15,17 +15,12 @@ protocol WebViewViewControllerDelegate: AnyObject {
 }
 
 final class WebViewViewController: UIViewController {
-    enum WebViewConstants {
-        static let unsplashAuthorizeURLString = "https://unsplash.com/oauth/authorize"
-    }
-    
     @IBOutlet private var webView: WKWebView!
     @IBOutlet private var progressView: UIProgressView!
     
     weak var delegate: WebViewViewControllerDelegate?
     
     //MARK: - ViewDidLoad
-    
     override func viewDidLoad() {
         super.viewDidLoad()
         webView.navigationDelegate = self
@@ -34,7 +29,6 @@ final class WebViewViewController: UIViewController {
     }
     
     //MARK: - Methods
-    
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         webView.addObserver(self, forKeyPath: #keyPath(WKWebView.estimatedProgress), options: .new, context: nil)
@@ -60,7 +54,8 @@ final class WebViewViewController: UIViewController {
     }
     
     private func loadAuthView() {
-        guard var urlComponents = URLComponents(string: WebViewConstants.unsplashAuthorizeURLString) else { return }
+        guard var urlComponents = URLComponents(string: Constants.unsplashAuthorizeURLString) else { return
+        }
         
         urlComponents.queryItems = [
             URLQueryItem(name: "client_id", value: Constants.accessKey),
@@ -78,6 +73,7 @@ final class WebViewViewController: UIViewController {
     }
 }
 
+//MARK: - Extension
 extension WebViewViewController: WKNavigationDelegate {
     func webView(_ webView: WKWebView, decidePolicyFor navigationAction: WKNavigationAction, decisionHandler: @escaping (WKNavigationActionPolicy) -> Void) {
         if let code = code(from: navigationAction) {
@@ -92,7 +88,7 @@ extension WebViewViewController: WKNavigationDelegate {
         if
             let url = navigationAction.request.url,
             let urlComponents = URLComponents(string: url.absoluteString),
-            urlComponents.path == "/oauth/authorize/native",
+            urlComponents.path == Constants.path,
             let items = urlComponents.queryItems,
             let codeItem = items.first(where: { $0.name == "code" })
         {

@@ -12,11 +12,6 @@ protocol NetworkRouting {
 }
 
 struct NetworkClient: NetworkRouting {
-    enum NetworkError: Error {
-        case httpStatusCode(Int)
-        case urlRequestError(Error)
-        case urlSessionError
-    }
     
     func fetch(request: URLRequest, handler: @escaping (Result<Data, Error>) -> Void) {
         let fulfillCompletionOnTheMainThread: (Result<Data, Error>) -> Void = { result in
@@ -30,7 +25,8 @@ struct NetworkClient: NetworkRouting {
                 if 200 ..< 300 ~= statusCode {
                     fulfillCompletionOnTheMainThread(.success(data))
                 } else {
-                    fulfillCompletionOnTheMainThread(.failure(NetworkError.httpStatusCode(statusCode)))
+                    let errorMessage = HTTPURLResponse.localizedString(forStatusCode: statusCode)
+                    fulfillCompletionOnTheMainThread(.failure(NetworkError.httpStatusCode(statusCode, errorMessage)))
                 }
             } else if let error = error {
                 fulfillCompletionOnTheMainThread(.failure(NetworkError.urlRequestError(error)))
