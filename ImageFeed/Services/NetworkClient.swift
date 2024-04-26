@@ -12,14 +12,14 @@ protocol NetworkRouting {
 }
 
 struct NetworkClient: NetworkRouting {
-    
+
     func fetch(request: URLRequest, handler: @escaping (Result<Data, Error>) -> Void) {
         let fulfillCompletionOnTheMainThread: (Result<Data, Error>) -> Void = { result in
             DispatchQueue.main.async {
                 handler(result)
             }
         }
-        
+
         let task = URLSession.shared.dataTask(with: request) { data, response, error in
             if let data = data, let response = response, let statusCode = (response as? HTTPURLResponse)?.statusCode {
                 if 200 ..< 300 ~= statusCode {

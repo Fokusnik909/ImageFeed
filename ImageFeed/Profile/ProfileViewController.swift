@@ -61,7 +61,6 @@ final class ProfileViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
         layout()
     }
     
@@ -94,5 +93,4 @@ final class ProfileViewController: UIViewController {
             descriptionLabel.leadingAnchor.constraint(equalTo: avatarPhoto.leadingAnchor)
         ])
     }
-
 }
