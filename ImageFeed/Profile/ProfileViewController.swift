@@ -7,15 +7,20 @@
 
 import Foundation
 import UIKit
+import Kingfisher
 
 final class ProfileViewController: UIViewController {
+    private let profileService = ProfileService.shared
+    private let profileImageService = ProfileImageService.shared
+    private var profileImageServiceObserver: NSObjectProtocol?
     
     //MARK: - Properties
-    
     private var avatarPhoto: UIImageView = {
         let imageView = UIImageView()
         imageView.image = UIImage(named: "profilePhoto")
         imageView.translatesAutoresizingMaskIntoConstraints = false
+        imageView.clipsToBounds = true
+        imageView.layer.cornerRadius = 35
         return imageView
     }()
     
@@ -62,12 +67,44 @@ final class ProfileViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         layout()
+        updateProfileDetails()
+        
+        profileImageServiceObserver = NotificationCenter.default    // 2
+            .addObserver(
+                forName: ProfileImageService.didChangeNotification, // 3
+                object: nil,                                        // 4
+                queue: .main                                        // 5
+            ) { [weak self] _ in
+                guard let self = self else { return }
+                self.updateAvatar()                                 // 6
+            }
+        updateAvatar()
     }
     
-    //MARK: - Methods
+ 
     
+    //MARK: - Methods
     @objc private func didTapLogoutButton(){
         print("logout")
+    }
+    
+    private func updateAvatar() {                                   // 8
+            guard
+                let profileImageURL = ProfileImageService.shared.avatarURL,
+                let url = URL(string: profileImageURL)
+            else { return }
+        // TO DO: Fix radius
+//        let processor = RoundCornerImageProcessor(cornerRadius: 61)
+//        avatarPhoto.kf.indicatorType = .activity
+        avatarPhoto.kf.setImage(with: url)
+            
+        }
+    
+    private func updateProfileDetails() {
+        guard let profile = profileService.profile else { return }
+        self.nameLabel.text = profile.name
+        self.handleName.text = profile.login
+        self.descriptionLabel.text = profile.bio
     }
     
     private func layout() {

@@ -11,9 +11,44 @@ final class OAuth2Service {
     static let shared = OAuth2Service()
     private init() { }
 
-    private var networkClient: NetworkRouting = NetworkClient()
+    private var lastCode: String?
+    private var currentTask: URLSessionTask?
 
     //MARK: - Methods
+    func fetchOAuthToken(code: String, completion: @escaping (Result<String, Error>) -> Void) {
+        assert(Thread.isMainThread)
+        
+        guard code != lastCode else {
+            assertionFailure("code == lastCode")
+            return
+        }
+
+        currentTask?.cancel()
+        
+        lastCode = code
+        guard let request = makeOAuthTokenRequest(code: code) else {
+            assertionFailure("Invalid request")
+            completion(.failure(NetworkError.invalidRequest))
+            return
+        }
+        
+        let session = URLSession.shared
+        currentTask = session.objectTask(for: request)  {
+            [weak self] (response: Result<OAuthTokenResponseBody, Error>) in
+            guard let self = self else { return }
+            self.currentTask = nil
+            
+            switch response {
+            case .success(let success):
+                let authToken = success.accessToken
+                print(authToken)
+                completion(.success(authToken))
+            case .failure(let failure):
+                completion(.failure(failure))
+            }
+        }
+    }
+    
     private func makeOAuthTokenRequest(code: String) -> URLRequest? {
         guard var urlComponents = URLComponents(string: Constants.unsplashTokenRequestString) else { print("Failed to create URL from URLComponents")
             return nil
@@ -36,30 +71,5 @@ final class OAuth2Service {
         request.httpMethod = "POST"
         return request
     }
-
-    func fetchOAuthToken(code: String, completion: @escaping (Result<String, Error>) -> Void) {
-        assert(Thread.isMainThread)
-        
-        guard let request = makeOAuthTokenRequest(code: code) else {
-            completion(.failure(NetworkError.invalidRequest))
-            return
-        }
-        
-        networkClient.fetch(request: request) { result in
-            switch result {
-            case .success(let date):
-                do {
-                    let decoder = JSONDecoder()
-                    decoder.keyDecodingStrategy = .convertFromSnakeCase
-                    let token = try decoder.decode(OAuthTokenResponseBody.self, from: date)
-                    completion(.success(token.accessToken))
-                } catch {
-                    completion(.failure(error))
-                }
-            case .failure(let error):
-                completion(.failure(error))
-            }
-        }
-        
-    }
+    
 }

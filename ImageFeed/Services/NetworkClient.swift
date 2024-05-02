@@ -8,12 +8,12 @@
 import Foundation
 
 protocol NetworkRouting {
-    func fetch(request: URLRequest, handler: @escaping (Result<Data, Error>) -> Void)
+    func fetch(request: URLRequest, handler: @escaping (Result<Data, Error>) -> Void) -> URLSessionTask
 }
 
 struct NetworkClient: NetworkRouting {
 
-    func fetch(request: URLRequest, handler: @escaping (Result<Data, Error>) -> Void) {
+    func fetch(request: URLRequest, handler: @escaping (Result<Data, Error>) -> Void) -> URLSessionTask {
         let fulfillCompletionOnTheMainThread: (Result<Data, Error>) -> Void = { result in
             DispatchQueue.main.async {
                 handler(result)
@@ -34,7 +34,8 @@ struct NetworkClient: NetworkRouting {
                 fulfillCompletionOnTheMainThread(.failure(NetworkError.urlSessionError))
             }
         }
-        return task.resume()
+        task.resume()
+        return task
     }
     
 }

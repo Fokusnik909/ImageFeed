@@ -7,7 +7,6 @@
 
 import Foundation
 import UIKit
-import ProgressHUD
 
 protocol AuthViewControllerDelegate: AnyObject {
     func didAuthenticate(_ vc: AuthViewController)
@@ -19,6 +18,7 @@ final class AuthViewController: UIViewController {
     private let showWebViewSegueIdentifier = "ShowWebView"
     private let oauth2Service = OAuth2Service.shared
     private let oauth2TokenStorage = OAuth2TokenStorage()
+    private let alertPresenter = AlertPresenter()
     
     weak var delegate: AuthViewControllerDelegate?
     
@@ -26,6 +26,7 @@ final class AuthViewController: UIViewController {
     //MARK: - Life cycle
     override func viewDidLoad() {
         super.viewDidLoad()
+        alertPresenter.delegate = self
         configureBackButton()
     }
     
@@ -47,6 +48,14 @@ final class AuthViewController: UIViewController {
         navigationItem.backBarButtonItem?.tintColor = UIColor(named: "YP Black")
     }
     
+    private func showAlert(error: Error) {
+        alertPresenter.showAlert(title: "Что-то пошло не так =(",
+                                 message: "Не удалось войти в систему - \(error.localizedDescription)",
+                                 handler: {
+            self.dismiss(animated: true)
+        })
+    }
+    
 }
 
 //MARK: - Extension
@@ -59,10 +68,11 @@ extension AuthViewController: WebViewViewControllerDelegate {
             case .success(let token):
                 self.oauth2TokenStorage.token = token
                 self.delegate?.didAuthenticate(self)
-                UIBlockingProgressHUD.dismiss()
             case .failure(let error):
+                showAlert(error: error)
                 print(error)
             }
+            UIBlockingProgressHUD.dismiss()
         }
     }
     
