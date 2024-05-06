@@ -63,42 +63,39 @@ final class ProfileViewController: UIViewController {
     lazy var subView: [UIView] = [self.avatarPhoto, self.logout, self.nameLabel, self.handleName, self.descriptionLabel]
     
     //MARK: - viewDidLoad
-    
     override func viewDidLoad() {
         super.viewDidLoad()
         layout()
         updateProfileDetails()
-        
-        profileImageServiceObserver = NotificationCenter.default    // 2
-            .addObserver(
-                forName: ProfileImageService.didChangeNotification, // 3
-                object: nil,                                        // 4
-                queue: .main                                        // 5
-            ) { [weak self] _ in
-                guard let self = self else { return }
-                self.updateAvatar()                                 // 6
-            }
+        profileImageServiceObserverSetting()
         updateAvatar()
     }
-    
- 
     
     //MARK: - Methods
     @objc private func didTapLogoutButton(){
         print("logout")
     }
     
-    private func updateAvatar() {                                   // 8
+    private func updateAvatar() {
             guard
                 let profileImageURL = ProfileImageService.shared.avatarURL,
                 let url = URL(string: profileImageURL)
             else { return }
-        // TO DO: Fix radius
-//        let processor = RoundCornerImageProcessor(cornerRadius: 61)
-//        avatarPhoto.kf.indicatorType = .activity
         avatarPhoto.kf.setImage(with: url)
             
         }
+    
+    private func profileImageServiceObserverSetting() {
+        profileImageServiceObserver = NotificationCenter.default
+            .addObserver(
+                forName: ProfileImageService.didChangeNotification,
+                object: nil,
+                queue: .main
+            ) { [weak self] _ in
+                guard let self = self else { return }
+                self.updateAvatar()
+            }
+    }
     
     private func updateProfileDetails() {
         guard let profile = profileService.profile else { return }

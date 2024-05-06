@@ -19,34 +19,35 @@ final class OAuth2Service {
         assert(Thread.isMainThread)
         
         guard code != lastCode else {
-            assertionFailure("code == lastCode")
+            completion(.failure(NetworkError.invalidRequest))
             return
         }
 
         currentTask?.cancel()
-        
         lastCode = code
+        
         guard let request = makeOAuthTokenRequest(code: code) else {
-            assertionFailure("Invalid request")
             completion(.failure(NetworkError.invalidRequest))
             return
         }
         
         let session = URLSession.shared
-        currentTask = session.objectTask(for: request)  {
+        let task = session.objectTask(for: request)  {
             [weak self] (response: Result<OAuthTokenResponseBody, Error>) in
             guard let self = self else { return }
-            self.currentTask = nil
             
             switch response {
             case .success(let success):
                 let authToken = success.accessToken
-                print(authToken)
                 completion(.success(authToken))
             case .failure(let failure):
                 completion(.failure(failure))
             }
+            self.currentTask = nil
+            self.lastCode = nil
         }
+        self.currentTask = task
+    
     }
     
     private func makeOAuthTokenRequest(code: String) -> URLRequest? {

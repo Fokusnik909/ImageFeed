@@ -19,7 +19,14 @@ final class ProfileService {
     
     func fetchProfile(token: String, completion: @escaping (Result<Profile, Error>) -> Void) {
         assert(Thread.isMainThread)
+        
+        guard token != lastToken else {
+            completion(.failure(NetworkError.invalidRequest))
+            return
+        }
+        
         currentTask?.cancel()
+        lastToken = token
         
         guard let request = makeProfileRequest(token: token) else {
             completion(.failure(NetworkError.invalidRequest))
@@ -27,21 +34,23 @@ final class ProfileService {
         }
         
         let session = URLSession.shared
-        currentTask = session.objectTask(for: request)  {
+        let task = session.objectTask(for: request)  {
             [weak self] (response: Result<ProfileResult, Error>) in
             guard let self = self else { return }
             
-            self.currentTask = nil
             switch response {
             case .success(let profileResult):
                 let profile = Profile(profile: profileResult)
                 self.profile = profile
-                profileImageServices.fetchProfileImageURL(username: profile.username) {_ in}
+                profileImageServices.fetchProfileImageURL(username: profile.username) {_ in }
                 completion(.success(profile))
             case .failure(let error):
                 completion(.failure(error))
             }
+            self.currentTask = nil
+            self.lastToken = nil
         }
+        self.currentTask = task
         
     }
     

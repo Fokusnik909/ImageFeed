@@ -20,7 +20,10 @@ final class ProfileImageService {
         assert(Thread.isMainThread)
         currentTask?.cancel()
         
-        guard let request = makeProfileImageRequest( username: username) else { return }
+        guard let request = makeProfileImageRequest( username: username) else { 
+            completion(.failure(NetworkError.invalidRequest))
+            return
+        }
         let session = URLSession.shared
         let task = session.objectTask(for: request) {
             [weak self] (result: Result<ProfileResult, Error>) in

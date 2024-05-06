@@ -13,30 +13,27 @@ protocol AuthViewControllerDelegate: AnyObject {
 }
 
 final class AuthViewController: UIViewController {
-    
     //MARK: - Properties
     private let showWebViewSegueIdentifier = "ShowWebView"
     private let oauth2Service = OAuth2Service.shared
     private let oauth2TokenStorage = OAuth2TokenStorage()
-    private let alertPresenter = AlertPresenter()
     
     weak var delegate: AuthViewControllerDelegate?
-    
     
     //MARK: - Life cycle
     override func viewDidLoad() {
         super.viewDidLoad()
-        alertPresenter.delegate = self
         configureBackButton()
     }
-    
     
     //MARK: - Methods
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         if segue.identifier == showWebViewSegueIdentifier {
             guard
                 let webViewViewController = segue.destination as? WebViewViewController
-            else { fatalError("Failed to prepare for \(showWebViewSegueIdentifier)") }
+            else {
+                fatalError("Failed to prepare for \(showWebViewSegueIdentifier)")
+            }
             webViewViewController.delegate = self
         }
     }
@@ -49,12 +46,26 @@ final class AuthViewController: UIViewController {
     }
     
     private func showAlert(error: Error) {
-        alertPresenter.showAlert(title: "Что-то пошло не так =(",
-                                 message: "Не удалось войти в систему - \(error.localizedDescription)",
-                                 handler: {
-            self.dismiss(animated: true)
-        })
+        let alertController = UIAlertController(title: "Что-то пошло не так =(",
+                                               message: "Не удалось войти в систему - \(error)",
+                                               preferredStyle: .alert)
+        
+        let okAction = UIAlertAction(title: "OK", style: .default) { [weak self] _ in
+            self?.dismiss(animated: true, completion: nil)
+        }
+        alertController.addAction(okAction)
+        
+        // Check if the view controller is currently presented
+        if self.presentedViewController == nil {
+            present(alertController, animated: true, completion: nil)
+        } else {
+            // If already presenting another view controller, present the alert after dismissing it
+            dismiss(animated: true) {
+                self.present(alertController, animated: true, completion: nil)
+            }
+        }
     }
+
     
 }
 
