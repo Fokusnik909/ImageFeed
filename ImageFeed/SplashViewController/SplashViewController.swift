@@ -34,8 +34,9 @@ final class SplashViewController: UIViewController {
             assertionFailure("[SplashViewController][switchToTabBarController]Invalid window configuration")
             return
         }
-        let tabBarController = UIStoryboard(name: "Main", bundle: .main)
-            .instantiateViewController(identifier: tabBarControllerID)
+        let tabBarController = TabBarController()
+//        tabBarController.modalPresentationStyle = .fullScreen
+//        present(tabBarController, animated: true)
         window.rootViewController = tabBarController
     }
     
