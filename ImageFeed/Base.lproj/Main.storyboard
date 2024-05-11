@@ -93,7 +93,7 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <wkWebView contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="BfH-Jy-Y4i">
-                                <rect key="frame" x="20" y="92" width="374" height="804"/>
+                                <rect key="frame" x="20" y="0.0" width="374" height="896"/>
                                 <color key="backgroundColor" name="YP White"/>
                                 <wkWebViewConfiguration key="configuration">
                                     <audiovisualMediaTypes key="mediaTypesRequiringUserActionForPlayback" none="YES"/>
@@ -101,7 +101,7 @@
                                 </wkWebViewConfiguration>
                             </wkWebView>
                             <progressView opaque="NO" contentMode="scaleToFill" verticalHuggingPriority="750" progress="0.5" translatesAutoresizingMaskIntoConstraints="NO" id="QbR-E0-zrF">
-                                <rect key="frame" x="0.0" y="92" width="414" height="4"/>
+                                <rect key="frame" x="0.0" y="0.0" width="414" height="4"/>
                                 <color key="progressTintColor" name="YP Black"/>
                             </progressView>
                         </subviews>
@@ -291,25 +291,6 @@
                 <placeholder placeholderIdentifier="IBFirstResponder" id="gxZ-1f-WMo" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="1208.6956521739132" y="-277.23214285714283"/>
-        </scene>
-        <!--Navigation Controller-->
-        <scene sceneID="yIB-t1-WeL">
-            <objects>
-                <navigationController automaticallyAdjustsScrollViewInsets="NO" id="pkb-Lc-Awb" sceneMemberID="viewController">
-                    <toolbarItems/>
-                    <navigationItem key="navigationItem" id="S4e-Zl-Mpf"/>
-                    <navigationBar key="navigationBar" contentMode="scaleToFill" id="Cjp-uB-BbO">
-                        <rect key="frame" x="0.0" y="48" width="414" height="44"/>
-                        <autoresizingMask key="autoresizingMask"/>
-                    </navigationBar>
-                    <nil name="viewControllers"/>
-                    <connections>
-                        <segue destination="CCn-0V-VV3" kind="relationship" relationship="rootViewController" id="fzX-ZR-Aie"/>
-                    </connections>
-                </navigationController>
-                <placeholder placeholderIdentifier="IBFirstResponder" id="mfc-Sm-H1B" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
-            </objects>
-            <point key="canvasLocation" x="-717.39130434782612" y="-935.49107142857133"/>
         </scene>
     </scenes>
     <resources>

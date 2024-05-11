@@ -48,16 +48,18 @@ final class SplashViewController: UIViewController {
     }
     
     private func presentAuthenticationViewController() {
-        guard let authVC = UIStoryboard(name: "Main", bundle: .main)
+        guard let authViewController = UIStoryboard(name: "Main", bundle: .main)
             .instantiateViewController(
                 identifier: authViewControllerID) as? AuthViewController
         else {
             assertionFailure("[SplashViewController] [verificationOfAuthorization]Failed to instantiateViewController")
             return
         }
-        authVC.delegate = self
-        authVC.modalPresentationStyle = .fullScreen
-        present(authVC, animated: true)
+        authViewController.delegate = self
+        let navigationController = UINavigationController(rootViewController: authViewController)
+        navigationController.modalPresentationStyle = .fullScreen
+        present(navigationController, animated: true)
+
     }
     
     private func showAlert() {
