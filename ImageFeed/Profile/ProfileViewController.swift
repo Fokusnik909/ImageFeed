@@ -71,30 +71,24 @@ final class ProfileViewController: UIViewController {
         updateAvatar()
     }
     
+    //MARK: - viewWillDisappear
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        profileImageServiceRemoveObserver()
+    }
+    
     //MARK: - Methods
     @objc private func didTapLogoutButton(){
         print("logout")
     }
     
     private func updateAvatar() {
-            guard
-                let profileImageURL = ProfileImageService.shared.avatarURL,
-                let url = URL(string: profileImageURL)
-            else { return }
+        guard
+            let profileImageURL = ProfileImageService.shared.avatarURL,
+            let url = URL(string: profileImageURL)
+        else { return }
         avatarPhoto.kf.setImage(with: url)
-            
-        }
-    
-    private func profileImageServiceObserverSetting() {
-        profileImageServiceObserver = NotificationCenter.default
-            .addObserver(
-                forName: ProfileImageService.didChangeNotification,
-                object: nil,
-                queue: .main
-            ) { [weak self] _ in
-                guard let self = self else { return }
-                self.updateAvatar()
-            }
+        
     }
     
     private func updateProfileDetails() {
@@ -126,5 +120,24 @@ final class ProfileViewController: UIViewController {
             descriptionLabel.topAnchor.constraint(equalTo: handleName.bottomAnchor, constant: 8),
             descriptionLabel.leadingAnchor.constraint(equalTo: avatarPhoto.leadingAnchor)
         ])
+    }
+    
+    //MARK: - Observer Method
+    private func profileImageServiceObserverSetting() {
+        profileImageServiceObserver = NotificationCenter.default
+            .addObserver(
+                forName: ProfileImageService.didChangeNotification,
+                object: nil,
+                queue: .main
+            ) { [weak self] _ in
+                guard let self = self else { return }
+                self.updateAvatar()
+            }
+    }
+    
+    private func profileImageServiceRemoveObserver() {
+        if let observer = profileImageServiceObserver {
+            NotificationCenter.default.removeObserver(observer)
+        }
     }
 }

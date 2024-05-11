@@ -15,13 +15,13 @@ final class OAuth2TokenStorage {
     
     var token: String? {
         get {
-            KeychainWrapper.standard.string(forKey: Keys.bearerToken.rawValue)
+            UserDefaults.standard.string(forKey: Keys.bearerToken.rawValue)
         } set {
             guard let newValue = newValue else {
                 print("[Error]: [OAuth2TokenStorage] - Save kay")
                 return
             }
-            KeychainWrapper.standard.set(newValue, forKey: Keys.bearerToken.rawValue)
+            UserDefaults.standard.set(newValue, forKey: Keys.bearerToken.rawValue)
         }
     }
 }
