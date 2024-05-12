@@ -13,7 +13,6 @@ protocol AuthViewControllerDelegate: AnyObject {
 }
 
 final class AuthViewController: UIViewController {
-    
     //MARK: - Properties
     private let showWebViewSegueIdentifier = "ShowWebView"
     private let oauth2Service = OAuth2Service.shared
@@ -21,20 +20,20 @@ final class AuthViewController: UIViewController {
     
     weak var delegate: AuthViewControllerDelegate?
     
-    
     //MARK: - Life cycle
     override func viewDidLoad() {
         super.viewDidLoad()
         configureBackButton()
     }
     
-    
     //MARK: - Methods
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         if segue.identifier == showWebViewSegueIdentifier {
             guard
                 let webViewViewController = segue.destination as? WebViewViewController
-            else { fatalError("Failed to prepare for \(showWebViewSegueIdentifier)") }
+            else {
+                fatalError("Failed to prepare for \(showWebViewSegueIdentifier)")
+            }
             webViewViewController.delegate = self
         }
     }
@@ -46,12 +45,34 @@ final class AuthViewController: UIViewController {
         navigationItem.backBarButtonItem?.tintColor = UIColor(named: "YP Black")
     }
     
-}
+    private func showAlert(error: Error) {
+        let alertController = UIAlertController(title: "Что-то пошло не так =(",
+                                               message: "Не удалось войти в систему - \(error)",
+                                               preferredStyle: .alert)
+        
+        let okAction = UIAlertAction(title: "OK", style: .default) { [weak self] _ in
+            self?.dismiss(animated: true, completion: nil)
+        }
+        alertController.addAction(okAction)
+        
+        // Check if the view controller is currently presented
+        if self.presentedViewController == nil {
+            present(alertController, animated: true, completion: nil)
+        } else {
+            // If already presenting another view controller, present the alert after dismissing it
+            dismiss(animated: true) {
+                self.present(alertController, animated: true, completion: nil)
+            }
+        }
+    }
 
+    
+}
 
 //MARK: - Extension
 extension AuthViewController: WebViewViewControllerDelegate {
     func webViewViewController(_ vc: WebViewViewController, didAuthenticateWithCode code: String) {
+        UIBlockingProgressHUD.show()
         oauth2Service.fetchOAuthToken(code: code) { [weak self] result in
             guard let self = self else { return }
             switch result {
@@ -59,8 +80,10 @@ extension AuthViewController: WebViewViewControllerDelegate {
                 self.oauth2TokenStorage.token = token
                 self.delegate?.didAuthenticate(self)
             case .failure(let error):
+                showAlert(error: error)
                 print(error)
             }
+            UIBlockingProgressHUD.dismiss()
         }
     }
     

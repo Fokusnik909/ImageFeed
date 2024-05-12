@@ -10,4 +10,8 @@ enum NetworkError: Error {
     case httpStatusCode(Int, String)
     case urlRequestError(Error)
     case urlSessionError
+    case invalidRequest
+    case decodingError
+    case imageError
+    case errorReceivingProfile
 }
