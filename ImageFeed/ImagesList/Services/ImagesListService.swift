@@ -13,9 +13,11 @@ final class ImagesListService {
     static let didChangeNotification = Notification.Name("ImagesListServiceDidChange")
     private var currentTask: URLSessionTask?
     private let token = OAuth2TokenStorage()
+
     
     func fetchPhotosNextPage() {
-        guard currentTask != nil else { return }
+        assert(Thread.isMainThread)
+        currentTask?.cancel()
         
         let nextPage = (lastLoadedPage ?? 0) + 1
         guard let request = makePhotosRequest(page: nextPage) else {
@@ -47,9 +49,11 @@ final class ImagesListService {
         guard let url = URL(string: "https://api.unsplash.com/photos?page=\(page)") else {
             return nil
         }
+    
         var request = URLRequest(url: url)
         guard let token = token.token else { return nil }
         request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        print(token)
         request.httpMethod = "GET"
         return request
     }
@@ -59,7 +63,7 @@ final class ImagesListService {
             print("[ImagesListService] [convertPhoto] thumbImageURL")
             return nil
         }
-        
+        print(thumbImageURL.absoluteString)
         guard let largeImageURL = URL(string: photo.urls.full) else {
             print("[ImagesListService] [convertPhoto] largeImageURL")
             return nil
@@ -73,8 +77,8 @@ final class ImagesListService {
         let dateString = formatDate(dateString: date)
         
         return Photo(id: photo.id,
+                     createdAt: dateString,
                      size: CGSize(width: photo.width, height: photo.height),
-                     createdAt: date,
                      welcomeDescription: photo.description,
                      thumbImageURL: thumbImageURL,
                      largeImageURL: largeImageURL,

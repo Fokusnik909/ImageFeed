@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct PhotoResult: Decodable {
+struct PhotoResult: Codable {
     let id: String
     let createdAt: String?
     let width, height: Int
@@ -15,12 +15,12 @@ struct PhotoResult: Decodable {
     let likes: Int
     let likedByUser: Bool
     let urls: UrlsPhoto
+    
 }
 
-struct UrlsPhoto: Decodable {
-    let thumb, raw, full, regular, small : String
+struct UrlsPhoto: Codable {
+    let  raw, full, regular, small, thumb : String
 }
-
 
    
 
