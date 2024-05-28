@@ -19,6 +19,11 @@ final class ImagesListService {
         assert(Thread.isMainThread)
         currentTask?.cancel()
         
+        if currentTask !=  nil {
+            print("Erroor")
+            return
+        }
+        
         let nextPage = (lastLoadedPage ?? 0) + 1
         guard let request = makePhotosRequest(page: nextPage) else {
             print(NetworkError.invalidRequest)
@@ -27,16 +32,19 @@ final class ImagesListService {
         
         let session = URLSession.shared
         let task = session.objectTask(for: request) {
-            [weak self] (result: Result<PhotoResult, Error>) in
+            [weak self] (result: Result<PhotoResultArray, Error>) in
             guard let self = self else { return }
             
             switch result {
             case .success(let resultPhoto):
-                if let convertedPhoto = self.convertPhoto(from: resultPhoto){
-                    self.photos.append(convertedPhoto)
-                    lastLoadedPage = nextPage
-                    NotificationCenter.default.post(name: Self.didChangeNotification, object: nil)
+                for i in resultPhoto {
+                    if let convertedPhoto = self.convertPhoto(from: i){
+                        self.photos.append(convertedPhoto)
+                        lastLoadedPage = nextPage
+                        NotificationCenter.default.post(name: Self.didChangeNotification, object: nil)
+                    }
                 }
+              
             case .failure(let failure):
                 print(failure)
             }
@@ -53,7 +61,6 @@ final class ImagesListService {
         var request = URLRequest(url: url)
         guard let token = token.token else { return nil }
         request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
-        print(token)
         request.httpMethod = "GET"
         return request
     }
@@ -63,7 +70,7 @@ final class ImagesListService {
             print("[ImagesListService] [convertPhoto] thumbImageURL")
             return nil
         }
-        print(thumbImageURL.absoluteString)
+        
         guard let largeImageURL = URL(string: photo.urls.full) else {
             print("[ImagesListService] [convertPhoto] largeImageURL")
             return nil
@@ -85,14 +92,14 @@ final class ImagesListService {
                      isLiked: photo.likedByUser)
     }
     
-    private  func formatDate(dateString: String, format: String = "yyyy-MM-dd") -> String? {
+    private  func formatDate(dateString: String) -> String? {
         let dateFormatter = DateFormatter()
-        dateFormatter.dateFormat = "yyyy-MM-dd"
+        dateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss'Z'"
         guard let date = dateFormatter.date(from: dateString) else {
             print("[ImagesListService] [formatDate]")
             return nil
         }
-        dateFormatter.dateFormat = format
+        dateFormatter.dateFormat = "dd MMMM yyyy"
         return dateFormatter.string(from: date)
     }
     

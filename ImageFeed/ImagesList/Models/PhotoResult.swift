@@ -22,6 +22,8 @@ struct UrlsPhoto: Codable {
     let  raw, full, regular, small, thumb : String
 }
 
+typealias PhotoResultArray = [PhotoResult]
+
    
 
 

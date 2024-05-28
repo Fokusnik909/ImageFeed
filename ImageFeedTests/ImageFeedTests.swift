@@ -24,6 +24,7 @@ final class ImageFeedTests: XCTestCase {
         }
         
         service.fetchPhotosNextPage()
+
         wait(for: [expectation], timeout: 10)
         
         XCTAssertEqual(service.photos.count, 10)
