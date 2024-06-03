@@ -18,6 +18,7 @@ final class ImagesListService {
     private var currentTask: URLSessionTask?
     private let token = OAuth2TokenStorage()
     private let dateFormatter8601 = ISO8601DateFormatter()
+    private let session = URLSession.shared
     
     private lazy var dateFormatter: DateFormatter = {
             let formatter = DateFormatter()
@@ -35,7 +36,6 @@ final class ImagesListService {
             return
         }
         
-        let session = URLSession.shared
         let task = session.objectTask(for: request) {
             [weak self] (result: Result<PhotoResultArray, Error>) in
             guard let self = self else { return }
@@ -45,7 +45,6 @@ final class ImagesListService {
                 self.photos.append(contentsOf: resultPhoto.compactMap(self.convertPhoto))
                 lastLoadedPage = nextPage
                 NotificationCenter.default.post(name: Self.didChangeNotification, object: nil)
-                
             case .failure(let failure):
                 print(failure)
             }
@@ -54,8 +53,44 @@ final class ImagesListService {
         self.currentTask = task
     }
     
+    func changeLike(photoId: String, isLike: Bool, _ completion: @escaping (Result<Photo, Error>) -> Void) {
+        guard let url = URL(string: "\(Constants.unsplashPhotosRequest)\(photoId)/like") else {
+            return
+        }
+        
+        var request = URLRequest(url: url)
+        guard let token = token.token else { return }
+        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        
+        request.httpMethod = isLike ? "DELETE" : "POST"
+        
+        _ = session.objectTaskData(for: request) { [weak self] result in
+            guard let self = self else { return }
+            
+            switch result {
+            case .success:
+                if let index = self.photos.firstIndex(where: { $0.id == photoId }) {
+                    let photo = self.photos[index]
+                    let newPhoto = Photo(id: photo.id,
+                                         size: photo.size,
+                                         createdAt: photo.createdAt,
+                                         welcomeDescription: photo.welcomeDescription,
+                                         thumbImageURL: photo.thumbImageURL,
+                                         fullImageURL: photo.fullImageURL,
+                                         isLiked: !photo.isLiked)
+                    self.photos[index] = newPhoto
+                    completion(.success(newPhoto))
+                }
+            case .failure(let error):
+                completion(.failure(error))
+            }
+        }
+        
+
+    }
+    
     private func makePhotosRequest(page: Int) -> URLRequest? {
-        guard let url = URL(string: "https://api.unsplash.com/photos?page=\(page)") else {
+        guard let url = URL(string: "\(Constants.unsplashPhotosRequest)?page=\(page)") else {
             return nil
         }
         var request = URLRequest(url: url)
@@ -68,7 +103,7 @@ final class ImagesListService {
     private func convertPhoto(from photo: PhotoResult) -> Photo? {
         guard
             let thumbImageURL = URL(string: photo.urls.thumb),
-            let largeImageURL = URL(string: photo.urls.full),
+            let fullImageURL = URL(string: photo.urls.full),
             let date = photo.createdAt
         else {
             print("[ImagesListService] [convertPhoto] Invalid URL or date")
@@ -80,7 +115,7 @@ final class ImagesListService {
                      createdAt: formatDate(from: date),
                      welcomeDescription: photo.description,
                      thumbImageURL: thumbImageURL,
-                     largeImageURL: largeImageURL,
+                     fullImageURL: fullImageURL,
                      isLiked: photo.likedByUser)
     }
     
@@ -96,5 +131,3 @@ final class ImagesListService {
     }
     
 }
-
-
