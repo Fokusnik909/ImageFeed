@@ -131,3 +131,9 @@ final class ImagesListService {
     }
     
 }
+
+extension ImagesListService {
+    func cleanPhoto() {
+        photos = []
+    }
+}

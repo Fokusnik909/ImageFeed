@@ -43,8 +43,7 @@ final class SingleImageViewController: UIViewController {
             case .success(let imageResult):
                 self.rescaleAndCenterImageInScrollView(image: imageResult.image )
             case .failure:
-                // TO DO: Show error
-                print("Error")
+                showAlert()
             }
         }
     }
@@ -94,6 +93,23 @@ final class SingleImageViewController: UIViewController {
         }
         
         imageView.frame = frameToCenter
+    }
+    
+    private func showAlert() {
+        let alertController = UIAlertController(
+            title: "Что-то пошло не так. Попробовать ещё раз?",
+            message: nil,
+            preferredStyle: .alert
+        )
+        alertController.addAction(UIAlertAction(title: "Повторить", style: .default) {
+            [weak self] _ in
+            self?.setImage()
+        })
+        alertController.addAction(UIAlertAction(title: "Не надо", style: .cancel) {
+           [weak self]  _ in
+            self?.dismiss(animated: true)
+        })
+        present(alertController, animated: true)
     }
     
 }

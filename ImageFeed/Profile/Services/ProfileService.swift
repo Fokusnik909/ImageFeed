@@ -68,4 +68,10 @@ final class ProfileService {
     
 }
 
+extension ProfileService {
+    func cleanProfile() {
+        profile = nil
+    }
+}
+
 

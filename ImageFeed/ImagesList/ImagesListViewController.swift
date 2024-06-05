@@ -65,7 +65,8 @@ final class ImagesListViewController: UIViewController {
             } completion: { _ in }
         }
     }
-    
+   
+    //MARK: - Observer Method
     private func profileImageServiceObserverSetting() {
         imagesListServiceObserver = NotificationCenter.default
             .addObserver(
@@ -159,12 +160,10 @@ extension ImagesListViewController: ImagesListCellDelegate {
             case .success:
                 self.photos = self.imagesListService.photos
                 cell.setIsLiked(isLike: self.photos[indexPath.row].isLiked)
-                UIBlockingProgressHUD.dismiss()
             case .failure(let error):
-                UIBlockingProgressHUD.dismiss()
-                // TODO: Показать ошибку с использованием UIAlertController
                 print(error)
             }
+            UIBlockingProgressHUD.dismiss()
         }
     }
     
