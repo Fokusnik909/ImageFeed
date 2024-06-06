@@ -98,6 +98,27 @@ final class ProfileViewController: UIViewController {
         self.descriptionLabel.text = profile.bio
     }
     
+    private func showAlert() {
+        let profileLogoutService = ProfileLogoutService.shared
+        let alertController = UIAlertController(
+            title: "Пока, Пока!",
+            message: "Уверены что хотите выйти?",
+            preferredStyle: .alert
+        )
+        
+        let buttonYes = UIAlertAction(title: "Да", style: .default) {  _ in
+            profileLogoutService.logout()
+        }
+        
+        let buttonNo = UIAlertAction(title: "Нет", style: .cancel)
+        
+        alertController.addAction(buttonYes)
+        alertController.addAction(buttonNo)
+        alertController.preferredAction = buttonYes
+        
+        present(alertController, animated: true)
+    }
+    
     private func layout() {
         view.backgroundColor = .ypBlack
         for view in subView { self.view.addSubview(view)}
@@ -139,27 +160,6 @@ final class ProfileViewController: UIViewController {
         if let observer = profileImageServiceObserver {
             NotificationCenter.default.removeObserver(observer)
         }
-    }
-    
-    private func showAlert() {
-        let profileLogoutService = ProfileLogoutService.shared
-        let alertController = UIAlertController(
-            title: "Пока, Пока!",
-            message: "Уверены что хотите выйти?",
-            preferredStyle: .alert
-        )
-        
-        let buttonYes = UIAlertAction(title: "Да", style: .default) {  _ in
-            profileLogoutService.logout()
-        }
-        
-        let buttonNo = UIAlertAction(title: "Нет", style: .cancel)
-        
-        alertController.addAction(buttonYes)
-        alertController.addAction(buttonNo)
-        alertController.preferredAction = buttonYes
-        
-        present(alertController, animated: true)
     }
     
 }

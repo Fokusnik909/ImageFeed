@@ -14,11 +14,12 @@ final class ProfileLogoutService {
     
     private init() { }
     
+    // MARK: - Private Properties
     private let profileService = ProfileService.shared
     private let profileImageService = ProfileImageService.shared
     private let imagesListService = ImagesListService.shared
     
-    
+    //MARK: - Methods
     func logout() {
         cleanCookies()
         cleanToken()

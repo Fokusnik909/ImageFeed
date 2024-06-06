@@ -9,6 +9,7 @@ import Foundation
 import UIKit
 
 final class SingleImageViewController: UIViewController {
+    // MARK: - Properties
     @IBOutlet private var scrollView: UIScrollView!
     @IBOutlet private var imageView: UIImageView!
     var image = UIImage()

@@ -9,6 +9,7 @@ import Foundation
 import UIKit
 
 final class SplashViewController: UIViewController {
+    // MARK: - Private Properties
     private let storage = OAuth2TokenStorage()
     private let profileServices = ProfileService.shared
     private let tabBarControllerID = "TabBarViewController"
@@ -29,37 +30,12 @@ final class SplashViewController: UIViewController {
     }
     
     //MARK: - Methods
-    private func switchToTabBarController() {
-        guard let window = UIApplication.shared.windows.first else {
-            assertionFailure("[SplashViewController][switchToTabBarController]Invalid window configuration")
-            return
-        }
-        let tabBarController = UIStoryboard(name: "Main", bundle: .main)
-            .instantiateViewController(identifier: tabBarControllerID)
-        window.rootViewController = tabBarController
-    }
-    
     private func verificationOfAuthorization() {
         if let token = storage.token {
             fetchProfile(token)
         }else {
             presentAuthenticationViewController()
         }
-    }
-    
-    private func presentAuthenticationViewController() {
-        guard let authViewController = UIStoryboard(name: "Main", bundle: .main)
-            .instantiateViewController(
-                identifier: authViewControllerID) as? AuthViewController
-        else {
-            assertionFailure("[SplashViewController] [verificationOfAuthorization]Failed to instantiateViewController")
-            return
-        }
-        authViewController.delegate = self
-        let navigationController = UINavigationController(rootViewController: authViewController)
-        navigationController.modalPresentationStyle = .fullScreen
-        present(navigationController, animated: true)
-
     }
     
     private func showAlert() {
@@ -73,6 +49,31 @@ final class SplashViewController: UIViewController {
         present(alertController, animated: true)
     }
     
+    // MARK: - Navigation
+    private func presentAuthenticationViewController() {
+        guard let authViewController = UIStoryboard(name: "Main", bundle: .main)
+            .instantiateViewController(
+                identifier: authViewControllerID) as? AuthViewController
+        else {
+            assertionFailure("[SplashViewController] [verificationOfAuthorization]Failed to instantiateViewController")
+            return
+        }
+        authViewController.delegate = self
+        let navigationController = UINavigationController(rootViewController: authViewController)
+        navigationController.modalPresentationStyle = .fullScreen
+        present(navigationController, animated: true)
+    }
+    
+    private func switchToTabBarController() {
+        guard let window = UIApplication.shared.windows.first else {
+            assertionFailure("[SplashViewController][switchToTabBarController]Invalid window configuration")
+            return
+        }
+        let tabBarController = UIStoryboard(name: "Main", bundle: .main)
+            .instantiateViewController(identifier: tabBarControllerID)
+        window.rootViewController = tabBarController
+    }
+    
     private func layout() {
         view.backgroundColor = .ypBlack
         self.view.addSubview(imageLogo)
@@ -83,6 +84,7 @@ final class SplashViewController: UIViewController {
     }
     
 }
+
 
 //MARK: - Extension
 extension SplashViewController: AuthViewControllerDelegate {

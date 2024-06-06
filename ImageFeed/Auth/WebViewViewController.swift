@@ -17,9 +17,9 @@ protocol WebViewViewControllerDelegate: AnyObject {
 final class WebViewViewController: UIViewController {
     @IBOutlet private var webView: WKWebView!
     @IBOutlet private var progressView: UIProgressView!
+    private var estimatedProgressObservation: NSKeyValueObservation?
     
     weak var delegate: WebViewViewControllerDelegate?
-    private var estimatedProgressObservation: NSKeyValueObservation?
     
     //MARK: - ViewDidLoad
     override func viewDidLoad() {

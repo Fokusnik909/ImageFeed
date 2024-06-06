@@ -8,8 +8,8 @@
 import UIKit
 
 final class ImagesListViewController: UIViewController {
+    // MARK: - Private Properties
     @IBOutlet private var tableView: UITableView!
-    
     private let showSingleImageSegueIdentifier = "ShowSingleImage"
     private var photos = [Photo]()
     private let imagesListService = ImagesListService.shared
@@ -23,6 +23,7 @@ final class ImagesListViewController: UIViewController {
         return formatter
     }()
     
+    //MARK: - Life cycle
     override func viewDidLoad() {
         super.viewDidLoad()
         tableView.contentInset = UIEdgeInsets(top: 12, left: 0, bottom: 12, right: 0)
@@ -35,6 +36,22 @@ final class ImagesListViewController: UIViewController {
         profileImageServiceRemoveObserver()
     }
     
+    //MARK: - Methods
+    private func updateTableViewAnimated() {
+        let oldCount = photos.count
+        let newCount = imagesListService.photos.count
+        photos = imagesListService.photos
+        if oldCount != newCount {
+            self.tableView.performBatchUpdates {
+                let indexPath = (oldCount..<newCount).map { i in
+                    IndexPath(row: i, section: 0)
+                }
+                tableView.insertRows(at: indexPath, with: .automatic)
+            } completion: { _ in }
+        }
+    }
+    
+    // MARK: - Navigation
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         if segue.identifier == showSingleImageSegueIdentifier {
             guard
@@ -49,20 +66,6 @@ final class ImagesListViewController: UIViewController {
             viewController.fullImageURL = image
         } else {
             super.prepare(for: segue, sender: sender)
-        }
-    }
-    
-    private func updateTableViewAnimated() {
-        let oldCount = photos.count
-        let newCount = imagesListService.photos.count
-        photos = imagesListService.photos
-        if oldCount != newCount {
-            self.tableView.performBatchUpdates {
-                let indexPath = (oldCount..<newCount).map { i in
-                    IndexPath(row: i, section: 0)
-                }
-                tableView.insertRows(at: indexPath, with: .automatic)
-            } completion: { _ in }
         }
     }
    
@@ -88,8 +91,8 @@ final class ImagesListViewController: UIViewController {
 }
 
 
+// MARK: - UITableViewDataSource
 extension ImagesListViewController: UITableViewDataSource {
-    
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return photos.count
     }
@@ -109,7 +112,7 @@ extension ImagesListViewController: UITableViewDataSource {
     
 }
 
-
+// MARK: - UITableViewDelegate
 extension ImagesListViewController: UITableViewDelegate {
     
     func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {

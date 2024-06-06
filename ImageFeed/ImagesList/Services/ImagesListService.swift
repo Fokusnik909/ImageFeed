@@ -10,9 +10,9 @@ import Foundation
 final class ImagesListService {
     static let didChangeNotification = Notification.Name("ImagesListServiceDidChange")
     static let shared = ImagesListService()
-    
     private init() {}
     
+    // MARK: - Private Properties
     private (set) var photos: [Photo] = []
     private var lastLoadedPage: Int?
     private var currentTask: URLSessionTask?
@@ -27,6 +27,7 @@ final class ImagesListService {
             return formatter
         }()
     
+    //MARK: - Methods
     func fetchPhotosNextPage() {
         guard currentTask == nil else { return }
         
@@ -85,8 +86,6 @@ final class ImagesListService {
                 completion(.failure(error))
             }
         }
-        
-
     }
     
     private func makePhotosRequest(page: Int) -> URLRequest? {
@@ -125,15 +124,13 @@ final class ImagesListService {
             print("[ImagesListService] [formatDate]")
             return nil
         }
-
+        
         return dateFormatter.string(from: date)
-
+    }
+    
+    func cleanPhoto() {
+        photos = []
     }
     
 }
 
-extension ImagesListService {
-    func cleanPhoto() {
-        photos = []
-    }
-}

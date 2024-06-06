@@ -11,11 +11,13 @@ final class ProfileImageService {
     static let shared = ProfileImageService()
     static let didChangeNotification = Notification.Name(rawValue: "ProfileImageProviderDidChange")
     
+    // MARK: - Private Properties
     private let token = OAuth2TokenStorage()
     private (set) var avatarURL: String?
     private var currentTask: URLSessionTask?
     private init() {}
     
+    //MARK: - Methods
     func fetchProfileImageURL(username: String, _ completion: @escaping (Result<String, Error>) -> Void) {
         assert(Thread.isMainThread)
         currentTask?.cancel()

@@ -8,11 +8,15 @@
 import Foundation
 
 final class OAuth2Service {
+    // MARK: - Singleton
     static let shared = OAuth2Service()
-    private init() { }
-
+    
+    // MARK: - Private Properties
     private var lastCode: String?
     private var currentTask: URLSessionTask?
+    
+    //MARK: - Private Init
+    private init() { }
 
     //MARK: - Methods
     func fetchOAuthToken(code: String, completion: @escaping (Result<String, Error>) -> Void) {
@@ -47,7 +51,6 @@ final class OAuth2Service {
             self.lastCode = nil
         }
         self.currentTask = task
-    
     }
     
     private func makeOAuthTokenRequest(code: String) -> URLRequest? {
