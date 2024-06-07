@@ -31,11 +31,6 @@ final class ImagesListViewController: UIViewController {
         imagesListService.fetchPhotosNextPage()
     }
     
-    override func viewWillDisappear(_ animated: Bool) {
-        super.viewWillDisappear(animated)
-        profileImageServiceRemoveObserver()
-    }
-    
     //MARK: - Methods
     private func updateTableViewAnimated() {
         let oldCount = photos.count
@@ -88,13 +83,17 @@ final class ImagesListViewController: UIViewController {
         }
     }
     
+    deinit {
+        profileImageServiceRemoveObserver()
+    }
+    
 }
 
 
 // MARK: - UITableViewDataSource
 extension ImagesListViewController: UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return photos.count
+        return imagesListService.photos.count
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
@@ -105,9 +104,22 @@ extension ImagesListViewController: UITableViewDataSource {
         }
         
         cell.delegate = self
-        
+    
         configCell(for: cell, with: indexPath)
         return cell
+    }
+    
+    private func configCell(for cell: ImagesListCell, with indexPath: IndexPath) {
+        let photo = photos[indexPath.row]
+        cell.cellImage.kf.setImage(with: photo.thumbImageURL,
+                                   placeholder: UIImage(named: "placeholderImage")
+        ) { [weak self] _ in
+            guard let self = self else { return }
+            self.tableView.reloadRows(at: [indexPath], with: .automatic)
+        }
+        
+        cell.cellImage.kf.indicatorType = .activity
+        cell.dateLabel.text = photo.createdAt
     }
     
 }
@@ -123,19 +135,6 @@ extension ImagesListViewController: UITableViewDelegate {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
         performSegue(withIdentifier: showSingleImageSegueIdentifier, sender: indexPath)
-    }
-    
-    func configCell(for cell: ImagesListCell, with indexPath: IndexPath) {
-        let photo = photos[indexPath.row]
-        cell.cellImage.kf.setImage(with: photo.thumbImageURL,
-                                   placeholder: UIImage(named: "placeholderImage")
-        ) { [weak self] _ in
-            guard let self = self else { return }
-            self.tableView.reloadRows(at: [indexPath], with: .automatic)
-        }
-        
-        cell.cellImage.kf.indicatorType = .activity
-        cell.dateLabel.text = photo.createdAt
     }
     
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {

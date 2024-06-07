@@ -35,4 +35,5 @@ final class ImagesListCell: UITableViewCell {
         let imageLike = isLike ? "Active" : "No Active"
         likeButton.setImage(UIImage(named: imageLike), for: .normal)
     }
+    
 }
