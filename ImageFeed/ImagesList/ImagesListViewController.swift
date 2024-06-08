@@ -15,14 +15,6 @@ final class ImagesListViewController: UIViewController {
     private let imagesListService = ImagesListService.shared
     private var imagesListServiceObserver: NSObjectProtocol?
     
-    
-    private lazy var dateFormatter: DateFormatter = {
-        let formatter = DateFormatter()
-        formatter.dateStyle = .long
-        formatter.timeStyle = .none
-        return formatter
-    }()
-    
     //MARK: - Life cycle
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -104,23 +96,22 @@ extension ImagesListViewController: UITableViewDataSource {
         }
         
         cell.delegate = self
-    
-        configCell(for: cell, with: indexPath)
+        cell.configCell(for: cell, with: indexPath, photo: photos[indexPath.row], tableView: tableView)
         return cell
     }
     
-    private func configCell(for cell: ImagesListCell, with indexPath: IndexPath) {
-        let photo = photos[indexPath.row]
-        cell.cellImage.kf.setImage(with: photo.thumbImageURL,
-                                   placeholder: UIImage(named: "placeholderImage")
-        ) { [weak self] _ in
-            guard let self = self else { return }
-            self.tableView.reloadRows(at: [indexPath], with: .automatic)
-        }
-        
-        cell.cellImage.kf.indicatorType = .activity
-        cell.dateLabel.text = photo.createdAt
-    }
+//    private func configCell(for cell: ImagesListCell, with indexPath: IndexPath) {
+//        let photo = photos[indexPath.row]
+//        cell.cellImage.kf.setImage(with: photo.thumbImageURL,
+//                                   placeholder: UIImage(named: "placeholderImage")
+//        ) { [weak self] _ in
+//            guard let self = self else { return }
+//            self.tableView.reloadRows(at: [indexPath], with: .automatic)
+//        }
+//        
+//        cell.cellImage.kf.indicatorType = .activity
+//        cell.dateLabel.text = photo.createdAt
+//    }
     
 }
 
