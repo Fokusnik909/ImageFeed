@@ -65,7 +65,7 @@ final class ImagesListService {
         
         request.httpMethod = isLike ? "DELETE" : "POST"
         
-        _ = session.objectTaskData(for: request) { [weak self] result in
+        let task = session.objectTaskData(for: request) { [weak self] result in
             guard let self = self else { return }
             
             switch result {
@@ -78,7 +78,7 @@ final class ImagesListService {
                                          welcomeDescription: photo.welcomeDescription,
                                          thumbImageURL: photo.thumbImageURL,
                                          fullImageURL: photo.fullImageURL,
-                                         isLiked: !isLike)
+                                         isLiked: !photo.isLiked)
                     self.photos[index] = newPhoto
                     completion(.success(newPhoto))
                 }
@@ -86,6 +86,7 @@ final class ImagesListService {
                 completion(.failure(error))
             }
         }
+        task.resume()
     }
     
     private func makePhotosRequest(page: Int) -> URLRequest? {

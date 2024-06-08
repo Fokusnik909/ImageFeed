@@ -100,19 +100,6 @@ extension ImagesListViewController: UITableViewDataSource {
         return cell
     }
     
-//    private func configCell(for cell: ImagesListCell, with indexPath: IndexPath) {
-//        let photo = photos[indexPath.row]
-//        cell.cellImage.kf.setImage(with: photo.thumbImageURL,
-//                                   placeholder: UIImage(named: "placeholderImage")
-//        ) { [weak self] _ in
-//            guard let self = self else { return }
-//            self.tableView.reloadRows(at: [indexPath], with: .automatic)
-//        }
-//        
-//        cell.cellImage.kf.indicatorType = .activity
-//        cell.dateLabel.text = photo.createdAt
-//    }
-    
 }
 
 // MARK: - UITableViewDelegate
@@ -150,9 +137,9 @@ extension ImagesListViewController: ImagesListCellDelegate {
             guard let self = self else { return }
             
             switch result {
-            case .success:
-                self.photos = self.imagesListService.photos
-                cell.setIsLiked(isLike: self.photos[indexPath.row].isLiked)
+            case .success(let photoIsLiked):
+                self.photos[indexPath.row] = photoIsLiked
+                cell.setIsLiked(isLike: photoIsLiked.isLiked)
             case .failure(let error):
                 print(error)
             }
