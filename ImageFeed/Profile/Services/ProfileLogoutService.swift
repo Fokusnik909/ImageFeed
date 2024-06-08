@@ -35,7 +35,7 @@ final class ProfileLogoutService {
     private func cleanProfile() {
         profileService.cleanProfile()
         profileImageService.cleanProfileImage()
-        imagesListService.cleanPhoto()
+        imagesListService.cleanImageList()
     }
     
     func switchToSplashController() {

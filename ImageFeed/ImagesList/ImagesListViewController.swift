@@ -11,7 +11,7 @@ final class ImagesListViewController: UIViewController {
     // MARK: - Private Properties
     @IBOutlet private var tableView: UITableView!
     private let showSingleImageSegueIdentifier = "ShowSingleImage"
-    private var photos = [Photo]()
+    private var imageList = [Photo]()
     private let imagesListService = ImagesListService.shared
     private var imagesListServiceObserver: NSObjectProtocol?
     
@@ -25,9 +25,9 @@ final class ImagesListViewController: UIViewController {
     
     //MARK: - Methods
     private func updateTableViewAnimated() {
-        let oldCount = photos.count
-        let newCount = imagesListService.photos.count
-        photos = imagesListService.photos
+        let oldCount = imageList.count
+        let newCount = imagesListService.imageList.count
+        imageList = imagesListService.imageList
         if oldCount != newCount {
             self.tableView.performBatchUpdates {
                 let indexPath = (oldCount..<newCount).map { i in
@@ -49,7 +49,7 @@ final class ImagesListViewController: UIViewController {
                 return
             }
             
-            let image = photos[indexPath.row].fullImageURL
+            let image = imageList[indexPath.row].fullImageURL
             viewController.fullImageURL = image
         } else {
             super.prepare(for: segue, sender: sender)
@@ -81,11 +81,10 @@ final class ImagesListViewController: UIViewController {
     
 }
 
-
 // MARK: - UITableViewDataSource
 extension ImagesListViewController: UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return imagesListService.photos.count
+        return imagesListService.imageList.count
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
@@ -96,7 +95,7 @@ extension ImagesListViewController: UITableViewDataSource {
         }
         
         cell.delegate = self
-        cell.configCell(for: cell, with: indexPath, photo: photos[indexPath.row], tableView: tableView)
+        cell.configCell(for: cell, with: indexPath, photo: imageList[indexPath.row], tableView: tableView)
         return cell
     }
     
@@ -106,7 +105,7 @@ extension ImagesListViewController: UITableViewDataSource {
 extension ImagesListViewController: UITableViewDelegate {
     
     func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
-        guard indexPath.row + 1 == photos.count else { return }
+        guard indexPath.row + 1 == imageList.count else { return }
         imagesListService.fetchPhotosNextPage()
     }
     
@@ -116,7 +115,7 @@ extension ImagesListViewController: UITableViewDelegate {
     }
     
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-        let image = photos[indexPath.row]
+        let image = imageList[indexPath.row]
         let imageInsets = UIEdgeInsets(top: 4, left: 16, bottom: 4, right: 16)
         let imageViewWidth = tableView.bounds.width - imageInsets.left - imageInsets.right
         let imageWidth = image.size.width
@@ -130,15 +129,15 @@ extension ImagesListViewController: UITableViewDelegate {
 extension ImagesListViewController: ImagesListCellDelegate {
     func imageListCellDidTapLike(_ cell: ImagesListCell) {
         guard let indexPath = tableView.indexPath(for: cell) else { return }
-        let photo = photos[indexPath.row]
+        let photo = imageList[indexPath.row]
         
         UIBlockingProgressHUD.show()
-        imagesListService.changeLike(photoId: photo.id, isLike: photo.isLiked) { [weak self] result in
+        imagesListService.toggleImageLike(photoId: photo.id, isLike: photo.isLiked) { [weak self] result in
             guard let self = self else { return }
             
             switch result {
             case .success(let photoIsLiked):
-                self.photos[indexPath.row] = photoIsLiked
+                self.imageList[indexPath.row] = photoIsLiked
                 cell.setIsLiked(isLike: photoIsLiked.isLiked)
             case .failure(let error):
                 print(error)

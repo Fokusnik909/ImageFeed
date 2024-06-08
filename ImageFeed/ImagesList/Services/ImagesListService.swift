@@ -13,10 +13,10 @@ final class ImagesListService {
     private init() {}
     
     // MARK: - Private Properties
-    private (set) var photos: [Photo] = []
+    private (set) var imageList: [Photo] = []
     private var lastLoadedPage: Int?
     private var currentTask: URLSessionTask?
-    private let token = OAuth2TokenStorage()
+    private let oauthToken = OAuth2TokenStorage()
     private let dateFormatter8601 = ISO8601DateFormatter()
     private let session = URLSession.shared
     
@@ -43,7 +43,7 @@ final class ImagesListService {
             
             switch result {
             case .success(let resultPhoto):
-                self.photos.append(contentsOf: resultPhoto.compactMap(self.convertPhoto))
+                self.imageList.append(contentsOf: resultPhoto.compactMap(self.convertPhoto))
                 lastLoadedPage = nextPage
                 NotificationCenter.default.post(name: Self.didChangeNotification, object: nil)
             case .failure(let failure):
@@ -54,13 +54,13 @@ final class ImagesListService {
         self.currentTask = task
     }
     
-    func changeLike(photoId: String, isLike: Bool, _ completion: @escaping (Result<Photo, Error>) -> Void) {
+    func toggleImageLike(photoId: String, isLike: Bool, _ completion: @escaping (Result<Photo, Error>) -> Void) {
         guard let url = URL(string: "\(Constants.unsplashPhotosRequest)\(photoId)/like") else {
             return
         }
         
         var request = URLRequest(url: url)
-        guard let token = token.token else { return }
+        guard let token = oauthToken.token else { return }
         request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
         
         request.httpMethod = isLike ? "DELETE" : "POST"
@@ -70,8 +70,8 @@ final class ImagesListService {
             
             switch result {
             case .success:
-                if let index = self.photos.firstIndex(where: { $0.id == photoId }) {
-                    let photo = self.photos[index]
+                if let index = self.imageList.firstIndex(where: { $0.id == photoId }) {
+                    let photo = self.imageList[index]
                     let newPhoto = Photo(id: photo.id,
                                          size: photo.size,
                                          createdAt: photo.createdAt,
@@ -79,7 +79,7 @@ final class ImagesListService {
                                          thumbImageURL: photo.thumbImageURL,
                                          fullImageURL: photo.fullImageURL,
                                          isLiked: !photo.isLiked)
-                    self.photos[index] = newPhoto
+                    self.imageList[index] = newPhoto
                     completion(.success(newPhoto))
                 }
             case .failure(let error):
@@ -94,7 +94,7 @@ final class ImagesListService {
             return nil
         }
         var request = URLRequest(url: url)
-        guard let token = token.token else { return nil }
+        guard let token = oauthToken.token else { return nil }
         request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
         request.httpMethod = "GET"
         return request
@@ -112,14 +112,14 @@ final class ImagesListService {
         
         return Photo(id: photo.id,
                      size: CGSize(width: photo.width, height: photo.height),
-                     createdAt: formatDate(from: date),
+                     createdAt: formatImageDate(from: date),
                      welcomeDescription: photo.description,
                      thumbImageURL: thumbImageURL,
                      fullImageURL: fullImageURL,
                      isLiked: photo.likedByUser)
     }
     
-    private func formatDate(from dateString: String) -> String? {
+    private func formatImageDate(from dateString: String) -> String? {
 
         guard let date = dateFormatter8601.date(from: dateString) else {
             print("[ImagesListService] [formatDate]")
@@ -129,8 +129,8 @@ final class ImagesListService {
         return dateFormatter.string(from: date)
     }
     
-    func cleanPhoto() {
-        photos = []
+    func cleanImageList() {
+        imageList = []
     }
     
 }
