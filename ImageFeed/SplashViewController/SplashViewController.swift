@@ -9,6 +9,7 @@ import Foundation
 import UIKit
 
 final class SplashViewController: UIViewController {
+    // MARK: - Private Properties
     private let storage = OAuth2TokenStorage()
     private let profileServices = ProfileService.shared
     private let tabBarControllerID = "TabBarViewController"
@@ -29,16 +30,6 @@ final class SplashViewController: UIViewController {
     }
     
     //MARK: - Methods
-    private func switchToTabBarController() {
-        guard let window = UIApplication.shared.windows.first else {
-            assertionFailure("[SplashViewController][switchToTabBarController]Invalid window configuration")
-            return
-        }
-        let tabBarController = UIStoryboard(name: "Main", bundle: .main)
-            .instantiateViewController(identifier: tabBarControllerID)
-        window.rootViewController = tabBarController
-    }
-    
     private func verificationOfAuthorization() {
         if let token = storage.token {
             fetchProfile(token)
@@ -47,6 +38,7 @@ final class SplashViewController: UIViewController {
         }
     }
     
+    // MARK: - Navigation
     private func presentAuthenticationViewController() {
         guard let authViewController = UIStoryboard(name: "Main", bundle: .main)
             .instantiateViewController(
@@ -59,18 +51,16 @@ final class SplashViewController: UIViewController {
         let navigationController = UINavigationController(rootViewController: authViewController)
         navigationController.modalPresentationStyle = .fullScreen
         present(navigationController, animated: true)
-
     }
     
-    private func showAlert() {
-        let alertController = UIAlertController(title: "Что-то пошло не так, попробуйте позже",
-                                                message: "", preferredStyle: .alert)
-        let okAction = UIAlertAction(title: "Ок", style: .cancel) { [weak self] _ in
-            guard let self = self else { return }
-            self.presentAuthenticationViewController()
+    private func switchToTabBarController() {
+        guard let window = UIApplication.shared.windows.first else {
+            assertionFailure("[SplashViewController][switchToTabBarController]Invalid window configuration")
+            return
         }
-        alertController.addAction(okAction)
-        present(alertController, animated: true)
+        let tabBarController = UIStoryboard(name: "Main", bundle: .main)
+            .instantiateViewController(identifier: tabBarControllerID)
+        window.rootViewController = tabBarController
     }
     
     private func layout() {
@@ -84,6 +74,7 @@ final class SplashViewController: UIViewController {
     
 }
 
+
 //MARK: - Extension
 extension SplashViewController: AuthViewControllerDelegate {
     func didAuthenticate(_ vc: AuthViewController) {
@@ -95,13 +86,20 @@ extension SplashViewController: AuthViewControllerDelegate {
         profileServices.fetchProfile(token: token) { [weak self] result in
             UIBlockingProgressHUD.dismiss()
             guard let self = self else { return }
-
+            
             switch result {
             case .success:
                 self.switchToTabBarController()
             case .failure(let error):
                 print("[SplashViewController] [fetchProfile] Error - \(error)")
-                showAlert()
+                let alertController = AlertModals.createOkAlert(
+                    title: "Что-то пошло не так, попробуйте позже",
+                    message: nil,
+                    okButton: "Ок") { [weak self] in
+                        guard let self = self else { return }
+                        self.presentAuthenticationViewController()
+                    }
+                present(alertController, animated: true)
             }
         }
     }

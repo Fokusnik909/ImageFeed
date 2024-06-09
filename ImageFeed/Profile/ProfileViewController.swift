@@ -79,7 +79,14 @@ final class ProfileViewController: UIViewController {
     
     //MARK: - Methods
     @objc private func didTapLogoutButton(){
-        print("logout")
+        let profileLogoutService = ProfileLogoutService.shared
+        let alertController = AlertModals.createOkCancelAlert(title: "Пока, Пока!",
+                                        message: "Уверены что хотите выйти?",
+                                        okButton: "Да",
+                                        cancelButton: "Нет") {
+            profileLogoutService.logout()
+        }
+        present(alertController, animated: true)
     }
     
     private func updateAvatar() {
@@ -140,4 +147,5 @@ final class ProfileViewController: UIViewController {
             NotificationCenter.default.removeObserver(observer)
         }
     }
+    
 }

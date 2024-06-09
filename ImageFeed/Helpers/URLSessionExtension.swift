@@ -18,8 +18,10 @@ extension URLSession {
             }
             
             let task = URLSession.shared.dataTask(with: request) { data, response, error in
-                if let data = data, let response = response, let statusCode = (response as? HTTPURLResponse)?.statusCode {
-                    if 200 ..< 300 ~= statusCode {
+                if let data = data,
+                   let response = response,
+                   let statusCode = (response as? HTTPURLResponse)?.statusCode {
+                    if (200 ..< 300).contains(statusCode) {
                         do {
                             let decoder = JSONDecoder()
                             decoder.keyDecodingStrategy = .convertFromSnakeCase
@@ -28,6 +30,33 @@ extension URLSession {
                         } catch {
                             fulfillCompletionOnTheMainThread(.failure(NetworkError.decodingError))
                         }
+                    } else {
+                        let errorMessage = HTTPURLResponse.localizedString(forStatusCode: statusCode)
+                        fulfillCompletionOnTheMainThread(.failure(NetworkError.httpStatusCode(statusCode, errorMessage)))
+                    }
+                } else if let error = error {
+                    fulfillCompletionOnTheMainThread(.failure(NetworkError.urlRequestError(error)))
+                } else {
+                    fulfillCompletionOnTheMainThread(.failure(NetworkError.urlSessionError))
+                }
+            }
+            task.resume()
+            return task
+        }
+    
+    func objectTaskData(
+        for request: URLRequest,
+        completion: @escaping (Result<Data, Error>) -> Void) -> URLSessionTask {
+            let fulfillCompletionOnTheMainThread: (Result<Data, Error>) -> Void = { result in
+                DispatchQueue.main.async {
+                    completion(result)
+                }
+            }
+            
+            let task = URLSession.shared.dataTask(with: request) { data, response, error in
+                if let data = data, let response = response, let statusCode = (response as? HTTPURLResponse)?.statusCode {
+                    if (200 ..< 300).contains(statusCode) {
+                        fulfillCompletionOnTheMainThread(.success(data))
                     } else {
                         let errorMessage = HTTPURLResponse.localizedString(forStatusCode: statusCode)
                         fulfillCompletionOnTheMainThread(.failure(NetworkError.httpStatusCode(statusCode, errorMessage)))

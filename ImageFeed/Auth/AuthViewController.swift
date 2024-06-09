@@ -46,15 +46,13 @@ final class AuthViewController: UIViewController {
     }
     
     private func showAlert(error: Error) {
-        let alertController = UIAlertController(title: "Что-то пошло не так =(",
-                                               message: "Не удалось войти в систему - \(error)",
-                                               preferredStyle: .alert)
-        
-        let okAction = UIAlertAction(title: "OK", style: .default) { [weak self] _ in
-            self?.dismiss(animated: true, completion: nil)
-        }
-        alertController.addAction(okAction)
-        
+        let alertController = AlertModals.createOkAlert(
+            title: "Что-то пошло не так =(",
+            message: "Не удалось войти в систему - \(error)",
+            okButton: "OK") { [weak self]  in
+                guard let self = self else { return }
+                self.dismiss(animated: true, completion: nil)
+            }
         // Check if the view controller is currently presented
         if self.presentedViewController == nil {
             present(alertController, animated: true, completion: nil)

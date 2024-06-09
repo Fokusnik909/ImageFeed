@@ -10,6 +10,7 @@ import Foundation
 final class ProfileService {
     static let shared = ProfileService()
     
+    // MARK: - Private Properties
     private var currentTask: URLSessionTask?
     private var lastToken: String?
     private (set) var profile: Profile?
@@ -17,6 +18,7 @@ final class ProfileService {
     
     private init() {}
     
+    //MARK: - Methods
     func fetchProfile(token: String, completion: @escaping (Result<Profile, Error>) -> Void) {
         assert(Thread.isMainThread)
         
@@ -66,6 +68,8 @@ final class ProfileService {
         return request
     }
     
+    func cleanProfile() {
+        profile = nil
+    }
+    
 }
-
-

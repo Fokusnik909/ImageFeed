@@ -9,28 +9,20 @@ import Foundation
 import UIKit
 
 final class SingleImageViewController: UIViewController {
+    // MARK: - Properties
     @IBOutlet private var scrollView: UIScrollView!
     @IBOutlet private var imageView: UIImageView!
-     var image: UIImage? {
-        didSet {
-            guard isViewLoaded, let image else {return}
-            imageView.image = image
-            imageView.frame.size = image.size
-            rescaleAndCenterImageInScrollView(image: image)
-        }
-    }
-
+    private var image = UIImage()
+    var fullImageURL: URL?
+    
     //MARK: - Life cycle
     override func viewDidLoad() {
         super.viewDidLoad()
-        scrollView.minimumZoomScale = 0.1
-        scrollView.maximumZoomScale = 1.25
-    
-        guard let image = image else {return}
-        imageView.image = image
-        imageView.frame.size = image.size
-        rescaleAndCenterImageInScrollView(image: image)
+        self.scrollView.minimumZoomScale = 0.1
+        self.scrollView.maximumZoomScale = 2.5
+        setImage()
     }
+    
 
     //MARK: - Methods
     @IBAction private func didTapBackButton() {
@@ -38,9 +30,23 @@ final class SingleImageViewController: UIViewController {
     }
 
     @IBAction private func didTapShareButton() {
-        guard let image = image else {return}
-        let share = UIActivityViewController(activityItems: [image], applicationActivities: nil)
-        present(share, animated: true)
+        shareImage(image)
+    }
+    
+    private func setImage() {
+        UIBlockingProgressHUD.show()
+        imageView.kf.setImage(with: fullImageURL) { [weak self] result in
+            UIBlockingProgressHUD.dismiss()
+            
+            guard let self = self else { return }
+            switch result {
+            case .success(let imageResult):
+                self.image = imageResult.image
+                self.rescaleAndCenterImageInScrollView(image: image)
+            case .failure:
+                showAlert()
+            }
+        }
     }
 
     private func rescaleAndCenterImageInScrollView(image: UIImage) {
@@ -89,6 +95,18 @@ final class SingleImageViewController: UIViewController {
         imageView.frame = frameToCenter
     }
     
+    private func showAlert() {
+        let alertController = AlertModals.createOkCancelAlert(
+            title: "Что-то пошло не так. Попробовать ещё раз?",
+            message: nil, okButton: "Повторить",
+            cancelButton: "Не надо") { [weak self] in
+                self?.setImage()
+            } cancelHandler:  { [weak self] in
+                self?.dismiss(animated: true)
+            }
+        present(alertController, animated: true)
+    }
+
 }
 
 //MARK: - Extension
@@ -106,4 +124,38 @@ extension SingleImageViewController: UIScrollViewDelegate {
         updateMinZoomScaleForSize(view.bounds.size)
     }
     
+}
+
+extension SingleImageViewController {
+    private func shareImage(_ image: UIImage) {
+        guard let fileURL = generateTempFileURL(forImage: image) else { return }
+        
+        if let activityViewController = generateActivityViewController(forFileURL: fileURL) {
+            present(activityViewController, animated: true, completion: nil)
+        }
+    }
+
+    private func generateTempFileURL(forImage image: UIImage) -> URL? {
+        let fileManager = FileManager.default
+        let tempDirectoryURL = fileManager.temporaryDirectory
+        let fileURL = tempDirectoryURL.appendingPathComponent("image.jpg")
+        
+        if let imageData = image.jpegData(compressionQuality: 1.0) {
+            do {
+                try imageData.write(to: fileURL)
+                return fileURL
+            } catch {
+                print("Failed to write image data to file: \(error)")
+                return nil
+            }
+        } else {
+            print("Failed to convert image to data")
+            return nil
+        }
+    }
+
+    private func generateActivityViewController(forFileURL fileURL: URL) -> UIActivityViewController? {
+        let activityItems = [fileURL]
+        return UIActivityViewController(activityItems: activityItems, applicationActivities: nil)
+    }
 }
