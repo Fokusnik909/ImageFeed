@@ -14,5 +14,9 @@ struct Photo {
     let welcomeDescription: String?
     let thumbImageURL: URL
     let fullImageURL: URL
-    let isLiked: Bool
+    private(set)var isLiked: Bool
+    
+    mutating func toggledIsLiked()  {
+           isLiked = !isLiked
+        }
 }

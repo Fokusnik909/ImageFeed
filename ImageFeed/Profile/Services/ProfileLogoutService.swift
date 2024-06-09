@@ -40,7 +40,6 @@ final class ProfileLogoutService {
     
     func switchToSplashController() {
         guard let window = UIApplication.shared.windows.first else {
-            print(#fileID, #function, #line)
             return
         }
         let splashVC = SplashViewController()

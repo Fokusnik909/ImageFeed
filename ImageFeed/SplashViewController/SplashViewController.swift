@@ -38,17 +38,6 @@ final class SplashViewController: UIViewController {
         }
     }
     
-    private func showAlert() {
-        let alertController = UIAlertController(title: "Что-то пошло не так, попробуйте позже",
-                                                message: "", preferredStyle: .alert)
-        let okAction = UIAlertAction(title: "Ок", style: .cancel) { [weak self] _ in
-            guard let self = self else { return }
-            self.presentAuthenticationViewController()
-        }
-        alertController.addAction(okAction)
-        present(alertController, animated: true)
-    }
-    
     // MARK: - Navigation
     private func presentAuthenticationViewController() {
         guard let authViewController = UIStoryboard(name: "Main", bundle: .main)
@@ -97,13 +86,20 @@ extension SplashViewController: AuthViewControllerDelegate {
         profileServices.fetchProfile(token: token) { [weak self] result in
             UIBlockingProgressHUD.dismiss()
             guard let self = self else { return }
-
+            
             switch result {
             case .success:
                 self.switchToTabBarController()
             case .failure(let error):
                 print("[SplashViewController] [fetchProfile] Error - \(error)")
-                showAlert()
+                let alertController = AlertModals.createOkAlert(
+                    title: "Что-то пошло не так, попробуйте позже",
+                    message: nil,
+                    okButton: "Ок") { [weak self] in
+                        guard let self = self else { return }
+                        self.presentAuthenticationViewController()
+                    }
+                present(alertController, animated: true)
             }
         }
     }

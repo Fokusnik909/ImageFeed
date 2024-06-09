@@ -18,7 +18,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         ProgressHUD.animationType = .activityIndicator
         ProgressHUD.colorHUD = .lightGray
         ProgressHUD.colorAnimation = .black
-//        ProgressHUD.marginSize = 15
         return true
     }
 

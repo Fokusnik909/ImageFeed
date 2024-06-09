@@ -140,6 +140,11 @@ extension ImagesListViewController: ImagesListCellDelegate {
                 self.imageList[indexPath.row] = photoIsLiked
                 cell.setIsLiked(isLike: photoIsLiked.isLiked)
             case .failure(let error):
+                let alertController = AlertModals.createOkAlert(
+                    title: "Ошибка",
+                    message: "Что-то пошло не так, попробуйте снова",
+                    okButton: "Ок")
+                present(alertController, animated: true)
                 print(error)
             }
             UIBlockingProgressHUD.dismiss()

@@ -79,7 +79,14 @@ final class ProfileViewController: UIViewController {
     
     //MARK: - Methods
     @objc private func didTapLogoutButton(){
-        showAlert()
+        let profileLogoutService = ProfileLogoutService.shared
+        let alertController = AlertModals.createOkCancelAlert(title: "Пока, Пока!",
+                                        message: "Уверены что хотите выйти?",
+                                        okButton: "Да",
+                                        cancelButton: "Нет") {
+            profileLogoutService.logout()
+        }
+        present(alertController, animated: true)
     }
     
     private func updateAvatar() {
@@ -96,27 +103,6 @@ final class ProfileViewController: UIViewController {
         self.nameLabel.text = profile.name
         self.handleName.text = profile.login
         self.descriptionLabel.text = profile.bio
-    }
-    
-    private func showAlert() {
-        let profileLogoutService = ProfileLogoutService.shared
-        let alertController = UIAlertController(
-            title: "Пока, Пока!",
-            message: "Уверены что хотите выйти?",
-            preferredStyle: .alert
-        )
-        
-        let buttonYes = UIAlertAction(title: "Да", style: .default) {  _ in
-            profileLogoutService.logout()
-        }
-        
-        let buttonNo = UIAlertAction(title: "Нет", style: .cancel)
-        
-        alertController.addAction(buttonYes)
-        alertController.addAction(buttonNo)
-        alertController.preferredAction = buttonYes
-        
-        present(alertController, animated: true)
     }
     
     private func layout() {

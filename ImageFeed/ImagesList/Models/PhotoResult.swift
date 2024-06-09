@@ -18,7 +18,11 @@ struct PhotoResult: Decodable {
 }
 
 struct UrlsPhoto: Decodable {
-    let thumb, raw, full, regular, small : String
+    let thumb: String
+    let raw: String
+    let full: String
+    let regular: String
+    let small: String
 }
 
 

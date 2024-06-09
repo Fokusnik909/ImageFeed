@@ -12,7 +12,7 @@ final class SingleImageViewController: UIViewController {
     // MARK: - Properties
     @IBOutlet private var scrollView: UIScrollView!
     @IBOutlet private var imageView: UIImageView!
-    var image = UIImage()
+    private var image = UIImage()
     var fullImageURL: URL?
     
     //MARK: - Life cycle
@@ -30,8 +30,7 @@ final class SingleImageViewController: UIViewController {
     }
 
     @IBAction private func didTapShareButton() {
-        let share = UIActivityViewController(activityItems: [image], applicationActivities: nil)
-        present(share, animated: true)
+        shareImage(image)
     }
     
     private func setImage() {
@@ -42,7 +41,8 @@ final class SingleImageViewController: UIViewController {
             guard let self = self else { return }
             switch result {
             case .success(let imageResult):
-                self.rescaleAndCenterImageInScrollView(image: imageResult.image )
+                self.image = imageResult.image
+                self.rescaleAndCenterImageInScrollView(image: image)
             case .failure:
                 showAlert()
             }
@@ -64,7 +64,6 @@ final class SingleImageViewController: UIViewController {
         let x = (newContentSize.width - visibleRectSize.width) / 2
         let y = (newContentSize.height - visibleRectSize.height) / 2
         scrollView.setContentOffset(CGPoint(x: x, y: y), animated: false)
-
     }
 
     private func updateMinZoomScaleForSize(_ size: CGSize) {
@@ -97,22 +96,17 @@ final class SingleImageViewController: UIViewController {
     }
     
     private func showAlert() {
-        let alertController = UIAlertController(
+        let alertController = AlertModals.createOkCancelAlert(
             title: "Что-то пошло не так. Попробовать ещё раз?",
-            message: nil,
-            preferredStyle: .alert
-        )
-        alertController.addAction(UIAlertAction(title: "Повторить", style: .default) {
-            [weak self] _ in
-            self?.setImage()
-        })
-        alertController.addAction(UIAlertAction(title: "Не надо", style: .cancel) {
-           [weak self]  _ in
-            self?.dismiss(animated: true)
-        })
+            message: nil, okButton: "Повторить",
+            cancelButton: "Не надо") { [weak self] in
+                self?.setImage()
+            } cancelHandler:  { [weak self] in
+                self?.dismiss(animated: true)
+            }
         present(alertController, animated: true)
     }
-    
+
 }
 
 //MARK: - Extension
@@ -130,4 +124,38 @@ extension SingleImageViewController: UIScrollViewDelegate {
         updateMinZoomScaleForSize(view.bounds.size)
     }
     
+}
+
+extension SingleImageViewController {
+    private func shareImage(_ image: UIImage) {
+        guard let fileURL = generateTempFileURL(forImage: image) else { return }
+        
+        if let activityViewController = generateActivityViewController(forFileURL: fileURL) {
+            present(activityViewController, animated: true, completion: nil)
+        }
+    }
+
+    private func generateTempFileURL(forImage image: UIImage) -> URL? {
+        let fileManager = FileManager.default
+        let tempDirectoryURL = fileManager.temporaryDirectory
+        let fileURL = tempDirectoryURL.appendingPathComponent("image.jpg")
+        
+        if let imageData = image.jpegData(compressionQuality: 1.0) {
+            do {
+                try imageData.write(to: fileURL)
+                return fileURL
+            } catch {
+                print("Failed to write image data to file: \(error)")
+                return nil
+            }
+        } else {
+            print("Failed to convert image to data")
+            return nil
+        }
+    }
+
+    private func generateActivityViewController(forFileURL fileURL: URL) -> UIActivityViewController? {
+        let activityItems = [fileURL]
+        return UIActivityViewController(activityItems: activityItems, applicationActivities: nil)
+    }
 }

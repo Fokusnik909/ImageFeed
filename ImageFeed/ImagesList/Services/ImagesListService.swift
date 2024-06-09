@@ -21,11 +21,11 @@ final class ImagesListService {
     private let session = URLSession.shared
     
     private lazy var dateFormatter: DateFormatter = {
-            let formatter = DateFormatter()
-            formatter.dateFormat = "d MMMM yyyy"
-            formatter.locale = Locale(identifier: "ru_RU")
-            return formatter
-        }()
+        let formatter = DateFormatter()
+        formatter.dateFormat = "d MMMM yyyy"
+        formatter.locale = Locale(identifier: "ru_RU")
+        return formatter
+    }()
     
     //MARK: - Methods
     func fetchPhotosNextPage() {
@@ -71,16 +71,8 @@ final class ImagesListService {
             switch result {
             case .success:
                 if let index = self.imageList.firstIndex(where: { $0.id == photoId }) {
-                    let photo = self.imageList[index]
-                    let newPhoto = Photo(id: photo.id,
-                                         size: photo.size,
-                                         createdAt: photo.createdAt,
-                                         welcomeDescription: photo.welcomeDescription,
-                                         thumbImageURL: photo.thumbImageURL,
-                                         fullImageURL: photo.fullImageURL,
-                                         isLiked: !photo.isLiked)
-                    self.imageList[index] = newPhoto
-                    completion(.success(newPhoto))
+                    self.imageList[index].toggledIsLiked()
+                    completion(.success(imageList[index]))
                 }
             case .failure(let error):
                 completion(.failure(error))
@@ -90,11 +82,13 @@ final class ImagesListService {
     }
     
     private func makePhotosRequest(page: Int) -> URLRequest? {
-        guard let url = URL(string: "\(Constants.unsplashPhotosRequest)?page=\(page)") else {
+        guard let url = URL(string: "\(Constants.unsplashPhotosRequest)?page=\(page)"),
+              let token = oauthToken.token 
+        else {
             return nil
         }
+        
         var request = URLRequest(url: url)
-        guard let token = oauthToken.token else { return nil }
         request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
         request.httpMethod = "GET"
         return request
@@ -120,7 +114,7 @@ final class ImagesListService {
     }
     
     private func formatImageDate(from dateString: String) -> String? {
-
+        
         guard let date = dateFormatter8601.date(from: dateString) else {
             print("[ImagesListService] [formatDate]")
             return nil

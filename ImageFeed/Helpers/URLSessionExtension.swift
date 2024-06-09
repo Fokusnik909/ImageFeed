@@ -18,8 +18,10 @@ extension URLSession {
             }
             
             let task = URLSession.shared.dataTask(with: request) { data, response, error in
-                if let data = data, let response = response, let statusCode = (response as? HTTPURLResponse)?.statusCode {
-                    if 200 ..< 300 ~= statusCode {
+                if let data = data,
+                   let response = response,
+                   let statusCode = (response as? HTTPURLResponse)?.statusCode {
+                    if (200 ..< 300).contains(statusCode) {
                         do {
                             let decoder = JSONDecoder()
                             decoder.keyDecodingStrategy = .convertFromSnakeCase
@@ -53,7 +55,7 @@ extension URLSession {
             
             let task = URLSession.shared.dataTask(with: request) { data, response, error in
                 if let data = data, let response = response, let statusCode = (response as? HTTPURLResponse)?.statusCode {
-                    if 200 ..< 300 ~= statusCode {
+                    if (200 ..< 300).contains(statusCode) {
                         fulfillCompletionOnTheMainThread(.success(data))
                     } else {
                         let errorMessage = HTTPURLResponse.localizedString(forStatusCode: statusCode)
