@@ -58,6 +58,10 @@ final class ImagesListPresenter: ImagesListPresenterProtocol {
         return imageList[indexPath.row]
     }
     
+    func setImageList(_ photos: [Photo]) { // Метод для тестов
+        self.imageList = photos
+    }
+    
     func didTapLike(at indexPath: IndexPath, completion: @escaping (Result<Bool, Error>) -> Void) {
         let photo = imageList[indexPath.row]
         
