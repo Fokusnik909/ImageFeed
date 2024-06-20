@@ -40,6 +40,7 @@ final class ImagesListCell: UITableViewCell {
                     with indexPath: IndexPath,
                     photo: Photo,
                     tableView: UITableView) {
+        likeButton.accessibilityIdentifier = "likeButton"
         cell.cellImage.kf.indicatorType = .activity
         cell.cellImage.kf.setImage(with: photo.thumbImageURL,
                                    placeholder: UIImage(named: "placeholderImage")) { _ in

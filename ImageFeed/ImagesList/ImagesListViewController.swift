@@ -7,6 +7,10 @@
 
 import UIKit
 
+public protocol ImageListViewControllerProtocol: AnyObject {
+    
+}
+
 final class ImagesListViewController: UIViewController {
     // MARK: - Private Properties
     @IBOutlet private var tableView: UITableView!

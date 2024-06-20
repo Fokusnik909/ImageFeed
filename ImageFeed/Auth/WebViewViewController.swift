@@ -33,6 +33,7 @@ final class WebViewViewController: UIViewController, WebViewViewControllerProtoc
     //MARK: - ViewDidLoad
     override func viewDidLoad() {
         super.viewDidLoad()
+        webView.accessibilityIdentifier = "UnsplashWebView"
         webView.navigationDelegate = self
         presenter?.viewDidLoad()
         progressObservationKVO()
@@ -52,14 +53,12 @@ final class WebViewViewController: UIViewController, WebViewViewControllerProtoc
     }
     
     private func progressObservationKVO() {
-//        updateProgress()
         presenter?.didUpdateProgressValue(webView.estimatedProgress)
         estimatedProgressObservation = webView.observe(
                     \.estimatedProgress,
                     options: [],
                     changeHandler: { [weak self] _, _ in
                         guard let self = self else { return }
-//                        self.updateProgress()
                         presenter?.didUpdateProgressValue(webView.estimatedProgress)
                     })
     }
