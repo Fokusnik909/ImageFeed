@@ -9,10 +9,15 @@ import Foundation
 import UIKit
 import Kingfisher
 
-final class ProfileViewController: UIViewController {
-    private let profileService = ProfileService.shared
-    private let profileImageService = ProfileImageService.shared
-    private var profileImageServiceObserver: NSObjectProtocol?
+public protocol ProfileViewControllerProtocol: AnyObject {
+    var presenter: ProfilePresenterProtocol? { get set }
+    
+    func updateAvatar(url: URL)
+    func updateProfileDetails(profile: Profile)
+}
+
+final class ProfileViewController: UIViewController, ProfileViewControllerProtocol {
+    var presenter: ProfilePresenterProtocol?
     
     //MARK: - Properties
     private var avatarPhoto: UIImageView = {
@@ -30,6 +35,7 @@ final class ProfileViewController: UIViewController {
                                            action: #selector(Self.didTapLogoutButton))
         button.tintColor = .ypRed
         button.translatesAutoresizingMaskIntoConstraints = false
+        button.accessibilityIdentifier = "logoutButton"
         return button
     }()
     
@@ -66,43 +72,37 @@ final class ProfileViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         layout()
-        updateProfileDetails()
-        profileImageServiceObserverSetting()
-        updateAvatar()
+        presenter = ProfilePresenter(view: self)
+        presenter?.viewDidLoad()
     }
     
     //MARK: - viewWillDisappear
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
-        profileImageServiceRemoveObserver()
+        presenter?.profileImageServiceRemoveObserver()
     }
     
     //MARK: - Methods
-    @objc private func didTapLogoutButton(){
-        let profileLogoutService = ProfileLogoutService.shared
-        let alertController = AlertModals.createOkCancelAlert(title: "Пока, Пока!",
-                                        message: "Уверены что хотите выйти?",
-                                        okButton: "Да",
-                                        cancelButton: "Нет") {
-            profileLogoutService.logout()
-        }
-        present(alertController, animated: true)
-    }
-    
-    private func updateAvatar() {
-        guard
-            let profileImageURL = ProfileImageService.shared.avatarURL,
-            let url = URL(string: profileImageURL)
-        else { return }
+    func updateAvatar(url: URL) {
         avatarPhoto.kf.setImage(with: url)
         
     }
     
-    private func updateProfileDetails() {
-        guard let profile = profileService.profile else { return }
+    func updateProfileDetails(profile: Profile) {
         self.nameLabel.text = profile.name
         self.handleName.text = profile.login
         self.descriptionLabel.text = profile.bio
+    }
+    
+    @objc private func didTapLogoutButton(){
+        let alertController = AlertModals.createOkCancelAlert(title: "Пока, Пока!",
+                                        message: "Уверены что хотите выйти?",
+                                        okButton: "Да",
+                                        cancelButton: "Нет") { [weak self] in
+            guard let self else { return }
+            self.presenter?.logout()
+        }
+        present(alertController, animated: true)
     }
     
     private func layout() {
@@ -127,25 +127,6 @@ final class ProfileViewController: UIViewController {
             descriptionLabel.topAnchor.constraint(equalTo: handleName.bottomAnchor, constant: 8),
             descriptionLabel.leadingAnchor.constraint(equalTo: avatarPhoto.leadingAnchor)
         ])
-    }
-    
-    //MARK: - Observer Method
-    private func profileImageServiceObserverSetting() {
-        profileImageServiceObserver = NotificationCenter.default
-            .addObserver(
-                forName: ProfileImageService.didChangeNotification,
-                object: nil,
-                queue: .main
-            ) { [weak self] _ in
-                guard let self = self else { return }
-                self.updateAvatar()
-            }
-    }
-    
-    private func profileImageServiceRemoveObserver() {
-        if let observer = profileImageServiceObserver {
-            NotificationCenter.default.removeObserver(observer)
-        }
     }
     
 }

@@ -21,6 +21,7 @@ final class SingleImageViewController: UIViewController {
         self.scrollView.minimumZoomScale = 0.1
         self.scrollView.maximumZoomScale = 2.5
         setImage()
+        navigationItem.backBarButtonItem?.accessibilityIdentifier = "backButton"
     }
     
 
